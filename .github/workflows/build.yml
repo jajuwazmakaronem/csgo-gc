@@ -24,6 +24,8 @@ jobs:
     
     - name: Apply rank-display patch
       run: git apply csgo_gc_rank_display.patch
+    - name: Apply rank-debug v2 patch
+      run: git apply csgo_gc_rank_debu_v2.patch
 
     - if: matrix.os != 'windows-latest'
       name: Run sccache-cache
