@@ -1,0 +1,44 @@
+diff --git a/csgo_gc/gc_client.cpp b/csgo_gc/gc_client.cpp
+--- a/csgo_gc/gc_client.cpp
++++ b/csgo_gc/gc_client.cpp
+@@ -1451,6 +1451,11 @@ void ClientGC::ClientRequestPlayersProfile(GCMessageRead &messageRead)
+         return;
+     }
+ 
++    Platform::Print("RankPatchV2: profile request own=%d legacy_ids=%d job=%d\n",
++        request.has_account_id() && request.account_id() == AccountId(),
++        request.account_ids__deprecated_size(),
++        messageRead.JobId() != JobIdInvalid);
++
+     CMsgGCCStrike15_v2_PlayersProfile response;
+     if (request.has_request_id__deprecated())
+     {
+@@ -1483,7 +1488,7 @@ void ClientGC::ClientRequestPlayersProfile(GCMessageRead &messageRead)
+         addProfile(accountId);
+     }
+ 
+-    SendMessageToGame(false, k_EMsgGCCStrike15_v2_PlayersProfile, response);
++    SendMessageToGame(false, k_EMsgGCCStrike15_v2_PlayersProfile, response, messageRead.JobId());
+ }
+ 
+ void ClientGC::SetEventFavorite(GCMessageRead &messageRead)
+@@ -1836,6 +1841,10 @@ void ClientGC::BuildMatchmakingHello(CMsgGCCStrike15_v2_MatchmakingGC2ClientHell
+     message.mutable_commendation()->set_cmd_leader(GetConfig().m_commendedLeader);
+     message.set_player_level(m_inventory.PlayerLevel());
+     message.set_player_cur_xp(m_inventory.PlayerXp());
++
++    Platform::Print("RankPatchV2: hello competitive_rank=%d wins=%d level=%d xp=%d\n",
++        static_cast<int>(GetConfig().m_competitiveRank), GetConfig().m_competitiveWins,
++        m_inventory.PlayerLevel(), m_inventory.PlayerXp());
+ }
+ 
+ void ClientGC::BuildClientWelcome(CMsgClientWelcome &message, const CMsgClientHello &hello,
+@@ -1970,5 +1980,8 @@ void ClientGC::SendRankUpdate()
+     rank->set_wins(GetConfig().m_dangerZoneWins);
+     rank->set_rank_type_id(RankTypeDangerZone);
+ 
++    Platform::Print("RankPatchV2: rank update competitive_rank=%d wins=%d\n",
++        static_cast<int>(GetConfig().m_competitiveRank), GetConfig().m_competitiveWins);
++
+     SendMessageToGame(false, k_EMsgGCCStrike15_v2_ClientGCRankUpdate, message);
+ }
